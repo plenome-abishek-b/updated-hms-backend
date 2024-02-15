@@ -89,13 +89,13 @@ try {
     
   }
 
-async  finforDocAndShift(day:string,staff_id:number,global_shift_id:number) {
-  const slot_timings = await this.connection.query(`select doctor_shift.start_time,doctor_shift.end_time ,doctor_shift.day
-   from doctor_shift where day = ? and staff_id = ? and global_shift_id = ?`,[
-    day,staff_id,global_shift_id
-   ])
-    return slot_timings;
-  }
+  async  finforDocAndShift(day:string,staff_id:number,global_shift_id:number) {
+    const slot_timings = await this.connection.query(`select doctor_shift.id,doctor_shift.start_time,doctor_shift.end_time ,doctor_shift.day
+     from doctor_shift where day = ? and staff_id = ? and global_shift_id = ?`,[
+      day,staff_id,global_shift_id
+     ])
+      return slot_timings;
+    }
 
 
 

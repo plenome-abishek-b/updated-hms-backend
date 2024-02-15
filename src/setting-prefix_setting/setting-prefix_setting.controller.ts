@@ -6,7 +6,10 @@ import { SettingPrefixSetting } from './entities/setting-prefix_setting.entity';
 export class SettingPrefixSettingController {
   constructor(private readonly settingPrefixSettingService: SettingPrefixSettingService) {}
 
- 
+  @Post()
+  create(@Body() prefix_setting_entity:SettingPrefixSetting) {
+    return this.settingPrefixSettingService.create(prefix_setting_entity);
+  }
 
   @Get()
   findAll() {

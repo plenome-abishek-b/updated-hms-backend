@@ -436,7 +436,7 @@ console.log("ssss",adminShiftId)
 async findAll(): Promise<AddAppointment[]> {
  
   const appointment = await this.connection.query(`select appointment.id, patients.patient_name,concat('APPN','',appointment.id) as appointment_no, appointment.date,patients.mobileno,patients.gender,
-  CONCAT( staff.name, ' ', staff.surname,((staff.employee_id))) AS doctor_name,appointment.source,appoint_priority.priority_status,appoint_priority.id priorityID,appointment.live_consult,
+  CONCAT( staff.name, ' ', staff.surname,((staff.employee_id))) AS doctor_name,appointment.source,appoint_priority.priority_status,appointment.time,appoint_priority.id priorityID,appointment.live_consult,
   appointment.appointment_status,appointment.amount,global_shift.id  as shift_id,global_shift.name as shift,doctor_shift.id as slot_id,
   doctor_shift.day as slot from appointment
   join patients ON appointment.patient_id = patients.id

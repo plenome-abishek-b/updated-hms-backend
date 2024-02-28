@@ -24,7 +24,9 @@ export class InternalOpdTimelineController {
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.internalOpdTimelineService.remove(id);
+  remove(@Param('id') id: string,@Query('hosId') hosId: number) {
+    console.log(id,hosId,"aaaaasssssssssss");
+    
+    return this.internalOpdTimelineService.remove(id,hosId);
   }
 }

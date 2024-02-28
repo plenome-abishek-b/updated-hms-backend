@@ -17,6 +17,8 @@ export class OpdOutPatientService {
       const HOSpatient = await this.connection.query('select * from patients where id =?',[opd_entity.patient_id] )
         
       let HOspatientmobileno = HOSpatient[0].mobileno
+      console.log("rrrrr",HOSpatient);
+      
     
     let  HOSTrimmedmobileno = HOspatientmobileno.startsWith('91') ? HOspatientmobileno.slice(2):HOspatientmobileno;
 
@@ -105,7 +107,7 @@ let adminStaffId = adminStaff.id
 
 
 var HOStransaction_id:number
-const HOScaseRef = await this.connection.query('INSERT INTO case_references values(default,default)')
+const HOScaseRef = await this.connection.query('INSERT INTO case_references () values(default,default)')
 const HOSopdCreate = await this.connection.query(`
 insert into opd_details (case_reference_id,patient_id) values (?,?)`,[
   HOScaseRef.insertId,
@@ -168,7 +170,7 @@ insert into transactions (
     'payment',
     HOSopdCreate.insertId,
     'OPD',
-    opd_entity.opd_details_id,
+    opd_entity.patient_id,
     HOScaseRef.insertId,
     HOSamount.amount,
     opd_entity.payment_mode,
@@ -236,7 +238,6 @@ insert into transactions (
 
 
 // ##################################################################################################################################################################
- var transaction_id:number;
   const caseRef = await dynamicConnection.query('INSERT INTO case_references values(default,default)')
   const opdCreate = await dynamicConnection.query(`
   insert into opd_details (case_reference_id,patient_id,Hospital_id,hos_opd_id) values (?,?,?,?)`,[
@@ -270,8 +271,8 @@ const Patient_charges = await dynamicConnection.query(
     standard_charge, 
     tax,
     apply_charge,
-    amount
-    ) values(?,?,?,?,?,?,?,?)`,[
+    amount,Hospital_id,hos_patient_charges_id
+    ) values(?,?,?,?,?,?,?,?,?,?)`,[
       opd_entity.date,
       insertOPDID,
       1,
@@ -279,17 +280,19 @@ const Patient_charges = await dynamicConnection.query(
       HOSamount[0].standard_charge,      
         HOSamount[0].tax_percentage,
         opd_entity.apply_charge,
-        HOSamount[0].amount 
+        HOSamount[0].amount,
+        opd_entity.Hospital_id,
+        HOSPatient_charges.insertId
     ]
 )
 
 const adminpatient_charges_id = Patient_charges.insertId
 
 console.log(adminpatient_charges_id,"ssss");
+let adminTransaction_id;
 
   try{
    
-let adminTransaction_id;
   const transactions = await dynamicConnection.query(`
   insert into transactions (
   type,
@@ -359,7 +362,7 @@ console.log("sssss",organisation_id)
     opdCreate.insertId,
     organisation_id.id,
     adminpatient_charges_id,
-    transaction_id,
+    adminTransaction_id,
     "",
     adminStaffId,
     opd_entity.date+" "+opd_entity.time,
@@ -379,7 +382,8 @@ console.log("sssss",organisation_id)
     HOSvisitInsert.insertId
   ]
   )
-    
+  console.log("vvvvvvv")
+
 
 
  await dynamicConnection.close();
@@ -387,7 +391,7 @@ console.log("sssss",organisation_id)
 return [{
   "status":"success",
   "message":"opd details added successfully",
-  //  "inserted_details ":await this.connection.query('select * from opd_details where id = ?', )
+   "inserted_details ":await this.connection.query('select * from opd_details where id = ?',[HOSopdCreate.insertId] )
 }];
     }
 
@@ -407,6 +411,7 @@ async findAll() {
   const opd_details = await this.connection.query(`SELECT distinct patients.id,
   patients.patient_name,
   patients.guardian_name,
+  patients.age,
   patients.mobileno,patients.gender,
   (SELECT COUNT(*) FROM opd_details WHERE patients.id = opd_details.patient_id) AS totalrecheckup,
   (SELECT  visit_details.appointment_date 
@@ -468,14 +473,206 @@ console.log(values,"qqqq");
  
   }
 
+ 
 
-  catch (error) {
-    return [
-      {status:"failed",
-       "messege":"cannot update opd profile",
-       "error":error
-    }
-    ]
+async update(id:number, opd_entity:OpdOutPatient){
+  let dynamicConnection;
+  
+try{
+    const dynamicDbConfig = this.dynamicDbService.createDynamicDatabaseConfig(
+
+      process.env.ADMIN_IP,
+      process.env.ADMIN_DB_NAME,
+      process.env.ADMIN_DB_PASSWORD,
+      process.env.ADMIN_DB_USER_NAME
+      )
+    const dynamicConnectionOptions: MysqlConnectionOptions = dynamicDbConfig as MysqlConnectionOptions;
+  
+    dynamicConnection = await createConnection(dynamicConnectionOptions);
+    const [getHosTransc] = await this.connection.query(`select transaction_id,id from visit_details where opd_details_id = ?`,[id])
+    const HosTransaction = await this.connection.query(`update transactions set amount = ?,
+    payment_mode = ?,
+    note = ?,
+    payment_date = ? 
+    where id = ?`,[
+      opd_entity.amount,
+      opd_entity.payment_mode,
+      opd_entity.note,
+      opd_entity.payment_date,
+      getHosTransc.transaction_id
+    ])
+    const updateHosVisit = await this.connection.query(`update visit_details set height = ?,
+    weight = ?,
+    pulse = ?,
+    bp = ?,
+    temperature = ?,
+    respiration = ?,
+    known_allergies = ?,
+    symptoms_type = ?,
+    symptoms = ?,
+    note = ?,
+    appointment_date = ?,
+    case_type = ?,
+    casualty = ?,
+    patient_old = ?, 
+    organisation_id = ?,
+    refference = ?,
+    cons_doctor = ?
+    where id = ?`,[
+      opd_entity.height,
+      opd_entity.weight,
+      opd_entity.pulse,
+      opd_entity.bp,
+      opd_entity.temperature,
+      opd_entity.respiration,
+      opd_entity.known_allergies,
+      opd_entity.symptoms_type,
+      opd_entity.symptoms,
+      opd_entity.note,
+      opd_entity.appointment_date,
+      opd_entity.case_type,
+      opd_entity.casualty,
+      opd_entity.patient_old,
+      opd_entity.organisation_id,
+      opd_entity.refference,
+      opd_entity.cons_doctor,
+      getHosTransc.id 
+    ])
+    const [getHosDoccMail] = await this.connection.query(`select email from staff where id = ?`,[opd_entity.cons_doctor])
+
+    console.log(opd_entity.Hospital_id,id,"opd_entity.Hospital_id,id");
+    
+
+const [getAdminOpd] = await dynamicConnection.query(`select id from opd_details where Hospital_id = ? and hos_opd_id = ?`,[opd_entity.Hospital_id,id]) 
+
+console.log(getAdminOpd,"getAdminOpd");
+
+
+const [getAdminTrans] = await dynamicConnection.query(`select id,transaction_id from visit_details where opd_details_id = ?`,[getAdminOpd.id])
+
+const [getAdminOrg] = await dynamicConnection.query(`select id from organisation where Hospital_id = ? and hos_organisation_id = ?`,[opd_entity.Hospital_id,opd_entity.organisation_id])
+
+const [getAdminDocId] = await dynamicConnection.query(`select id from staff where email = ?`,[getHosDoccMail.email])
+
+const AdminTransaction = await dynamicConnection.query(`update transactions set amount = ?,
+payment_mode = ?,
+note = ?,
+payment_date = ? 
+where id = ?`,[
+  opd_entity.amount,
+  opd_entity.payment_mode,
+  opd_entity.note,
+  opd_entity.payment_date,
+  getAdminTrans.transaction_id
+])
+
+console.log("jjjjjjjjj",[
+  opd_entity.height,
+  opd_entity.weight,
+  opd_entity.pulse,
+  opd_entity.bp,
+  opd_entity.temperature,
+  opd_entity.respiration,
+  opd_entity.known_allergies,
+  opd_entity.symptoms_type,
+  opd_entity.symptoms,
+  opd_entity.note,
+  opd_entity.appointment_date,
+  opd_entity.case_type,
+  opd_entity.casualty,
+  opd_entity.patient_old,
+  getAdminOrg.id,
+  opd_entity.refference,
+  getAdminDocId.id,
+  getAdminTrans.id ]
+)
+const updateAdminVisit = await dynamicConnection.query(`update visit_details set height = ?,
+weight = ?,
+pulse = ?,
+bp = ?,
+temperature = ?,
+respiration = ?,
+known_allergies = ?,
+symptoms_type = ?,
+symptoms = ?,
+note = ?,
+appointment_date = ?,
+case_type = ?,
+casualty = ?,
+patient_old = ?, 
+organisation_id = ?,
+refference = ?,
+cons_doctor = ?
+where id = ?`,[
+  opd_entity.height,
+  opd_entity.weight,
+  opd_entity.pulse,
+  opd_entity.bp,
+  opd_entity.temperature,
+  opd_entity.respiration,
+  opd_entity.known_allergies,
+  opd_entity.symptoms_type,
+  opd_entity.symptoms,
+  opd_entity.note,
+  opd_entity.appointment_date,
+  opd_entity.case_type,
+  opd_entity.casualty,
+  opd_entity.patient_old,
+  getAdminOrg.id,
+  opd_entity.refference,
+  getAdminDocId.id,
+  getAdminTrans.id 
+])
+console.log("sdvhjdfvjh",updateAdminVisit);
+
+await dynamicConnection.close();
+
+  return  [{
+    "status":"success",
+    "messege":"opd updated successfully",
+    "updated_details":await this.connection.query('select * from opd_details where id = ?',[id])
+  }];
+} catch (error) {
+  if (dynamicConnection) {
+    await dynamicConnection.close();
   }
+  return "error is : "+error
+}
 }
 
+
+async remove(id: string,hos_id:number): Promise<{ [key: string]: any }[]> {
+  let dynamicConnection;
+  try {
+    const dynamicDbConfig = this.dynamicDbService.createDynamicDatabaseConfig(
+
+      process.env.ADMIN_IP,
+      process.env.ADMIN_DB_NAME,
+      process.env.ADMIN_DB_PASSWORD,
+      process.env.ADMIN_DB_USER_NAME
+      )
+    const dynamicConnectionOptions: MysqlConnectionOptions = dynamicDbConfig as MysqlConnectionOptions;
+  
+    dynamicConnection = await createConnection(dynamicConnectionOptions);
+  
+     const delAdminopd = await dynamicConnection.query(`update opd_details set is_deleted = 1 where Hospital_id = ?
+      and hos_opd_id = ?`,[hos_id,id])
+    const result = await this.connection.query('DELETE FROM opd_details  WHERE id = ?', [id]);
+    if (dynamicConnection) {
+      await dynamicConnection.close();  
+    }
+    return [{
+      "status":"success",
+      "message":" id: "+ id+" deleted successfully"
+    }
+    ];
+  } catch (error) {
+    if (dynamicConnection) {
+      await dynamicConnection.close();
+    }
+    return error
+  }
+  
+ 
+}
+}

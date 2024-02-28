@@ -36,6 +36,9 @@ export class OpdOutPatient {
     tpa_charge:number;
     created_at:Date;
     patient_id:number;
+    global_shift_id:number;
+    shift_id:number;
+    message:String;
     Hospital_id:number;
     
 }

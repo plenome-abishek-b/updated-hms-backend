@@ -10,7 +10,7 @@ export class InternalOpdOverviewVisitsService {
   ){}
 
   async findAll(patient_id:number) {
-    const visits = await this.connection.query(`  select CONCAT('OPDN', visit_details.opd_details_id) as opd_NO,opd_details.case_reference_id AS CASE_ID,visit_details.appointment_date,
+    const visits = await this.connection.query(`  select CONCAT('OPDN', visit_details.opd_details_id) as opd_NO,CONCAT ('OCID', opd_details.case_reference_id) AS OPD_checkup_ID,visit_details.appointment_date,
     CONCAT(staff.name, ' ', staff.surname, staff.employee_id)  AS consultant,visit_details.refference,visit_details.symptoms from visit_details
     join opd_details ON visit_details.opd_details_id = opd_details.id
     join staff ON visit_details.cons_doctor = staff.id where patient_id = ?`,[patient_id])

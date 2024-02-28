@@ -10,7 +10,7 @@ export class SetupPatientDisabledPatientListService {
   constructor(@InjectConnection() private connection: Connection) {}
  
   async findAll(): Promise<SetupPatientDisabledPatientList[]> {
-    const patients = await this.connection.query('select patients.id, patients.patient_name,concat(patients.age,"year",patients.month,"month",patients.day,"day") AS dob,patients.gender,patients.mobileno,patients.guardian_name,patients.address,patients.is_dead,patients.insurance_id,patients.insurance_validity from patients where is_active = ?', ['no']);
+    const patients = await this.connection.query('select patients.id, patients.patient_name,concat(patients.age,"year",patients.month,"month",patients.day,"day") AS dob,patients.age,patients.gender,patients.mobileno,patients.guardian_name,patients.address,patients.is_dead,patients.insurance_id,patients.insurance_validity from patients where is_active = ?', ['no']);
     console.log(patients,'patttt');
     
     return patients ;

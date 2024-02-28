@@ -82,7 +82,7 @@ import { SettingsFrontCmsSettingModule } from './settings-front_cms_setting/sett
 import { AddAppointmentDoctorWiseModule } from './add-appointment-doctor_wise/add-appointment-doctor_wise.module';
 import { AddAppointmentPatientQueueModule } from './add-appointment-patient_queue/add-appointment-patient_queue.module';
 import { TpaManagementModule } from './tpa_management/tpa_management.module';
-import { HumanResourceAddStaffModule } from './human_resource-add_staff/human_resource-add_staff.module';
+// import { HumanResourceAddStaffModule } from './human_resource-add_staff/human_resource-add_staff.module';
 import { HumanResourceStaffModule } from './human_resource_staff/human_resource_staff.module';
 
 
@@ -207,7 +207,7 @@ import { HumanResourceStaffModule } from './human_resource_staff/human_resource_
     SetupApptSlotTimimgsModule,
 
     SetupReferralReferralCommissionModule,
-    HumanResourceAddStaffModule,
+    // HumanResourceAddStaffModule,
     AddAppointmentModule,
     InternalAppointmentStaffModule,
     InternalAppointmentChargesModule,
@@ -235,7 +235,7 @@ import { HumanResourceStaffModule } from './human_resource_staff/human_resource_
     AddAppointmentDoctorWiseModule,
     AddAppointmentPatientQueueModule,
     TpaManagementModule,
-    HumanResourceAddStaffModule,
+    // HumanResourceAddStaffModule,
     HumanResourceStaffModule
   ],
   controllers: [AppController],

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
 import { InternalOpdChargesService } from './internal-opd-charges.service';
 import { InternalOpdCharge } from './entities/internal-opd-charge.entity';
 
@@ -12,22 +12,18 @@ export class InternalOpdChargesController {
   }
 
   @Get()
-  findAll() {
-    return this.internalOpdChargesService.findAll();
+  findAll(@Query("opd_id")opd_id:number,@Query("patient_id")patient_id:number) {
+    return this.internalOpdChargesService.findAll(opd_id,patient_id);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.internalOpdChargesService.findOne(+id);
+  @Patch(':id')
+  update(@Param('id') id: string, @Body()InternalOpdChargeentity: InternalOpdCharge ) {
+    return this.internalOpdChargesService.update(id,InternalOpdChargeentity );
   }
-
-  // @Patch(':id')
-  // update(@Param('id') id: string, @Body() ) {
-  //   return this.internalOpdChargesService.update(+id, );
-  // }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.internalOpdChargesService.remove(+id);
+    return this.internalOpdChargesService.remove(id);
   }
+
 }

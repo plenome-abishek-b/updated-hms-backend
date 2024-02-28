@@ -15,5 +15,8 @@ export class InternalOpdCharge {
     name:string;
     charge_type_id:number;
     charge_type:string;
+    Hospital_id:number;
+    hos_opd_id:number;
+
     
 }

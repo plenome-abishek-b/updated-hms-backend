@@ -111,6 +111,14 @@ console.log("staffEmailAdmin",staffEmailInHOS.email);
 const [adminStaff] = await dynamicConnection.query(`select id from staff where email = ?`,[staffEmailInHOS.email])
 let adminStaffId = adminStaff.id
    
+let payment_type;
+if(AppointmentEntity.payment_mode = `cash`){
+  payment_type = `Offline`
+}
+else{
+  payment_type = `Online`
+}
+ 
  
     var HOStransaction_id:number
     const HOScaseRef = await this.connection.query('INSERT INTO case_references values(default,default)')
@@ -257,6 +265,38 @@ console.log("ssss",adminShiftId)
       )
  
        hos_appointment_id = HOSbookAppnt.insertId
+ 
+       const Admin_Appt_Queue = await this.connection.query(`insert into appointment_queue(
+        appointment_id,
+        staff_id,
+        shift_id,
+        date
+        ) values (?,?,?,?)`,[
+          HOSbookAppnt.insertId,
+          AppointmentEntity.doctor,
+          AppointmentEntity.shift_id,
+          AppointmentEntity.date
+        ])
+ 
+ 
+        const HosApptPayment = await this.connection.query(`insert into
+        appointment_payment
+        (appointment_id,
+          charge_id,
+          paid_amount,
+          payment_mode,
+          payment_type,
+          transaction_id,
+          date) values (?,?,?,?,?,?,?)`,[
+            hos_appointment_id,
+            HOScharge_id,
+          HOSamount[0].amount,
+          AppointmentEntity.payment_mode,
+          payment_type,
+          HOStransaction_id,
+          AppointmentEntity.date+" "+AppointmentEntity.time
+        ])
+ 
    
       if(HOStransaction_id){
   const HOSupdatetxn = await this.connection.query(`update transactions set transactions.appointment_id = ? where transactions.id = ?`,[
@@ -271,10 +311,11 @@ console.log("ssss",adminShiftId)
   var transaction_id:number
   const caseRef = await dynamicConnection.query('INSERT INTO case_references values(default,default)')
   const opdCreate = await dynamicConnection.query(`
-  insert into opd_details (case_reference_id,patient_id,Hospital_id) values (?,?,?)`,[
+  insert into opd_details (case_reference_id,patient_id,Hospital_id,hos_opd_id) values (?,?,?,?)`,[
     caseRef.insertId,
     HOSpatientId,
-    AppointmentEntity.Hospital_id
+    AppointmentEntity.Hospital_id,
+    HOSopdCreate.insertId
   ])
    
    
@@ -297,8 +338,8 @@ console.log("ssss",adminShiftId)
      
       tax,
       apply_charge,
-      amount
-      ) values(?,?,?,?,?,?,?,?)`,[
+      amount,Hospital_id,hos_patient_charges_id
+      ) values(?,?,?,?,?,?,?,?,?,?)`,[
         AppointmentEntity.date,
         opdCreate.insertId,
         1,
@@ -306,7 +347,9 @@ console.log("ssss",adminShiftId)
         HOSamount[0].standard_charge,      
         HOSamount[0].tax_percentage,
         HOSamount[0].standard_charge,
-        HOSamount[0].amount
+        HOSamount[0].amount,
+        AppointmentEntity.Hospital_id,
+        Patient_charges_insert.insertId
    
       ]
   )
@@ -321,9 +364,9 @@ console.log("ssss",adminShiftId)
   case_reference_id,
   amount,
   payment_mode,
-  payment_date,Hospital_id
+  payment_date,Hospital_id,hos_transaction_id
   ) values
-  (?,?,?,?,?,?,?,?)`,[
+  (?,?,?,?,?,?,?,?,?)`,[
     'payment',
     'Appointment',
     HOSpatientId,
@@ -331,7 +374,8 @@ console.log("ssss",adminShiftId)
     HOSamount[0].amount,
     AppointmentEntity.payment_mode,
     AppointmentEntity.payment_date,
-    AppointmentEntity.Hospital_id
+    AppointmentEntity.Hospital_id,
+    HOStransaction_id
   ])
   transaction_id = transactions.insertId
   console.log(transaction_id,"idddddddddddddd");
@@ -349,8 +393,8 @@ console.log("ssss",adminShiftId)
     cons_doctor,
     appointment_date,
     live_consult,
-    payment_mode,Hospital_id
-    ) values (?,?,?,?,?,?,?,?,?)`
+    payment_mode,Hospital_id,hos_visit_id
+    ) values (?,?,?,?,?,?,?,?,?,?)`
     ,[
       opdCreate.insertId,
       Patient_charges.insertId,
@@ -360,7 +404,8 @@ console.log("ssss",adminShiftId)
       AppointmentEntity.date+" "+AppointmentEntity.time,
       AppointmentEntity.live_consult,
       AppointmentEntity.payment_mode,
-      AppointmentEntity.Hospital_id
+      AppointmentEntity.Hospital_id,
+      HOSvisitInsert.insertId
     ])
   const visit_details_id = visitInsert.insertId    
 //
@@ -399,6 +444,36 @@ console.log("ssss",adminShiftId)
         ]
     )
  
+    const Appt_Queue = await dynamicConnection.query(`insert into appointment_queue(
+      appointment_id,
+      staff_id,
+      shift_id,
+      date
+      ) values (?,?,?,?)`,[
+        bookAppnt.insertId,
+        adminStaffId,
+        adminShiftId.id,
+        AppointmentEntity.date
+      ])
+ 
+      const AdminApptPayment = await dynamicConnection.query(`insert into
+    appointment_payment
+    (appointment_id,
+      charge_id,
+      paid_amount,
+      payment_mode,
+      payment_type,
+      transaction_id,
+      date) values (?,?,?,?,?,?,?)`,[
+      bookAppnt.insertId,
+      getAdminChargeId[0].id,
+      HOSamount[0].amount,
+      AppointmentEntity.payment_mode,
+      payment_type,
+      transaction_id,
+      AppointmentEntity.date+" "+AppointmentEntity.time
+    ])
+ 
    
    console.log(hos_appointment_id,"dddddd")
     if(transaction_id){
@@ -412,11 +487,22 @@ console.log("ssss",adminShiftId)
    
     console.log("eeeeeeee")
  
-      return [{
-        "status":"success",
-        "messege":"Appointment booked successfully",
-        "inserted_details":await this.connection.query('select * from appointment where id = ?',[HOSbookAppnt.insertId])
-      }];
+    return [{
+      "status":"success",
+      "messege":"Appointment booked successfully",
+      "inserted_details":await this.connection.query(
+        `select appointment.id, patients.patient_name,concat('APPN','',appointment.id) as appointment_no, appointment.date,appointment.time,patients.mobileno,patients.gender,patients.email,
+        CONCAT( staff.name, ' ', staff.surname,((staff.employee_id))) AS doctor_name,appointment.source,appoint_priority.priority_status,appoint_priority.id priorityID,appointment.live_consult,
+        appointment.appointment_status,appointment.amount,global_shift.id  as shift_id,global_shift.name as shift,doctor_shift.id as slot_id,
+        doctor_shift.day as slot, appointment.created_at from appointment
+        join patients ON appointment.patient_id = patients.id
+        left join staff ON appointment.doctor = staff.id
+        left join appoint_priority ON appointment.priority = appoint_priority.id
+        left join transactions ON appointment.amount = transactions.id
+        left join global_shift ON appointment.global_shift_id = global_shift.id
+        left join doctor_shift ON appointment.shift_id = doctor_shift.id where appointment.id = ?`
+        ,[HOSbookAppnt.insertId])
+    }];
    
     } catch (error) {
       if(dynamicConnection){
@@ -425,11 +511,6 @@ console.log("ssss",adminShiftId)
       }
     }
   }
-   
- 
- 
- 
- 
  
  
  

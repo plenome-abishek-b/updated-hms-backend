@@ -22,10 +22,15 @@ export class OpdOutPatientController {
     return this.opdOutPatientService.findOne(search);
   }
 
+
+  @Patch(':id')
+  update(@Param('id') id:string, @Body() opd_entity:OpdOutPatient){
+    return this.opdOutPatientService.update(+id, opd_entity);
+  }
   
 
-  // @Delete(':id')
-  // remove(@Param('id') id: string) {
-  //   return this.opdOutPatientService.remove(+id);
-  // }
+  @Delete(':id')
+  remove(@Param('id') id: string,@Query('hos_id') hos_id:number) {
+    return this.opdOutPatientService.remove(id,hos_id);
+  }
 }

@@ -193,17 +193,19 @@ export class HumanResourceStaffService {
  
     console.log("StaffEntity.certificates",StaffEntity.certificates);
     
- 
-let cert =  await JSON.parse(JSON.stringify(StaffEntity.certificates))
-console.log(cert,"111222333");
-cert.forEach(async file => {
-console.log(file.fileName,"file");
-const createStaffCertifications =  await this.connection.query(
-        `INSERT INTO staff_certifications (certificate_name,issued_year, staff_id, document) VALUES (?, ?, ?,?)`,
-        [file.fileName,file.date,HRStaff_id, file.fileType],
-      );
- 
-})
+ if(StaffEntity.certificates){
+  let cert =  await JSON.parse(JSON.stringify(StaffEntity.certificates))
+  console.log(cert,"111222333");
+  cert.forEach(async file => {
+  console.log(file.fileName,"file");
+  const createStaffCertifications =  await this.connection.query(
+          `INSERT INTO staff_certifications (certificate_name,issued_year, staff_id, document) VALUES (?, ?, ?,?)`,
+          [file.fileName,file.date,HRStaff_id, file.fileType],
+        );
+   
+  })
+ }
+
  
     
  
@@ -439,7 +441,7 @@ staff_dynamic_roles_id = createDynamicRoles.insertId;
 console.log(staff_dynamic_roles_id,"idddstaffrole")
  
  
- 
+if(StaffEntity.certificates){
 let cert1 =  await JSON.parse(JSON.stringify(StaffEntity.certificates))
 for (const file of cert1) {
   console.log(file.fileName, file.date, HRDynamicStaffid, file.fileType);
@@ -450,7 +452,7 @@ for (const file of cert1) {
   );
 }
  
- 
+}
  
  
  

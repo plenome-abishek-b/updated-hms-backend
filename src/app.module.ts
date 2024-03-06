@@ -84,6 +84,12 @@ import { AddAppointmentPatientQueueModule } from './add-appointment-patient_queu
 import { TpaManagementModule } from './tpa_management/tpa_management.module';
 // import { HumanResourceAddStaffModule } from './human_resource-add_staff/human_resource-add_staff.module';
 import { HumanResourceStaffModule } from './human_resource_staff/human_resource_staff.module';
+import { Appointment_ReportModule } from './Reports/appointment-report/appointmentreport.module';
+import { PatientvisitReportModule } from './Reports/patientvisit-report/patientvisit-report.module';
+import { PatientBillReportModule } from './Reports/patientbill-report/patientbill-report.module';
+import { OpdReportModule } from './opd_report/opd_report.module';
+import { OpdBalanceReportModule } from './opd_balance_report/opd_balance_report.module';
+import { OpdDischargedPatientReportModule } from './opd_discharged_patient_report/opd_discharged_patient_report.module';
 
 
 
@@ -176,7 +182,7 @@ import { HumanResourceStaffModule } from './human_resource_staff/human_resource_
 
     SetupBedBedGroupModule,
 
-
+    Appointment_ReportModule,
     SetupBedBedModule,
 
     SetupBedBedStatusModule,
@@ -235,8 +241,13 @@ import { HumanResourceStaffModule } from './human_resource_staff/human_resource_
     AddAppointmentDoctorWiseModule,
     AddAppointmentPatientQueueModule,
     TpaManagementModule,
+    PatientvisitReportModule,
+    PatientBillReportModule,
     // HumanResourceAddStaffModule,
-    HumanResourceStaffModule
+    HumanResourceStaffModule,
+    OpdReportModule,
+    OpdBalanceReportModule,
+    OpdDischargedPatientReportModule
   ],
   controllers: [AppController],
   providers: [AppService],

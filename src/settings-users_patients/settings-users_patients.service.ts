@@ -8,8 +8,8 @@ export class SettingsUsersPatientsService {
   constructor(@InjectConnection() private connection: Connection) {}
 
   async findall() {
-    const users_patients = await this.connection.query(`select users.id,users.user_id as patient_id,patients.patient_name,users.username,patients.mobileno,users.is_active as action from users 
-    join patients on users.user_id = patients.id`);
+    const users_patients = await this.connection.query(`select patients.id as patient_id,patients.patient_name as patient_name,patients.ABHA_number as ABHA ,patients.mobileno, patients.is_active
+    from patients ;`);
     return users_patients;
   }
 

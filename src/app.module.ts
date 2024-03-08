@@ -90,6 +90,10 @@ import { PatientBillReportModule } from './Reports/patientbill-report/patientbil
 import { OpdReportModule } from './opd_report/opd_report.module';
 import { OpdBalanceReportModule } from './opd_balance_report/opd_balance_report.module';
 import { OpdDischargedPatientReportModule } from './opd_discharged_patient_report/opd_discharged_patient_report.module';
+import { transaction_ReportModule } from './Reports/Alltransaction-report/transactionreport.module';
+import { DailyTransactionReportModule } from './Reports/Dailytransaction-report/dailytransaction.module';
+import { IncomeSummaryModule } from './overallincome/overallincome.module';
+import { StaffRoleModule } from './staffcount/staffcount.module';
 
 
 
@@ -247,7 +251,12 @@ import { OpdDischargedPatientReportModule } from './opd_discharged_patient_repor
     HumanResourceStaffModule,
     OpdReportModule,
     OpdBalanceReportModule,
-    OpdDischargedPatientReportModule
+    OpdDischargedPatientReportModule,
+    SettingsRolesPermissionsModule,
+    transaction_ReportModule,
+    DailyTransactionReportModule,
+    IncomeSummaryModule,
+    StaffRoleModule
   ],
   controllers: [AppController],
   providers: [AppService],

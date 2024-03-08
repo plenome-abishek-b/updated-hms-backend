@@ -26,6 +26,7 @@
     "@nestjs/mapped-types": "*",
     "@nestjs/platform-express": "^10.0.0",
     "@nestjs/typeorm": "^10.0.1",
+    "aws-sdk": "^2.1570.0",
     "axios": "^1.6.2",
     "class-validator": "^0.14.0",
     "mysql2": "^3.6.5",
